@@ -1,35 +1,162 @@
-use clap::{arg, Command};
+//pub mod cmd::alias_list;
+use crate::cmd::{self, configx};
+use clap::{command, Arg, Command};
 
-fn registerApp(name:String) {
-	let matches = Command::new("myapp")
-        .version("1.0")
-        .author("Your Name <you@example.com>")
-        .about("CLI example with clap")
-        .subcommand(
-            Command::new("add")
-                .about("Adds files")
-                .arg(arg!(<FILE> "The file to add")),
-        )
-        .subcommand(
-            Command::new("remove")
-                .about("Removes files")
-                .arg(arg!(<FILE> "The file to remove")),
-        )
-        .get_matches();
+use super::{admin, alias};
 
-    match matches.subcommand() {
-        Some(("add", sub_matches)) => {
-            let file = sub_matches.get_one::<String>("FILE").unwrap();
-            println!("Adding file: {}", file);
+static APPNAME: &str = "rustfs-cli [FLAGS] COMMAND [COMMAND FLAGS | -h] [ARGUMENTS...]";
+static ABOUT: &str = "manager client for rustfs and minio";
+use clap::{Parser};
+
+#[derive(Parser)]
+#[command(name = "rustfs-cli")]
+#[command(about = ABOUT)]
+struct Cli {
+    #[command(subcommand)]
+    command: Commands,
+}
+
+// 定义主命令，包含 config 和 run 子命令
+#[derive(clap::Subcommand)]
+enum Commands {
+    #[command(about = "manage server credentials in configuration file")]
+    Alias {
+        #[command(subcommand)]
+        subcommand: alias::AliasCommands,  // 从 config 模块导入
+    },
+    #[command(about = "manage MinIO servers")]
+    Admin {
+        #[command(subcommand)]
+        subcommand: admin::AdminCommands,  // 从 run 模块导入
+    },
+}
+
+
+fn register_app() {
+    let cli = Cli::parse();
+
+    match &cli.command {
+        Commands::Alias { subcommand } => {
+            //handle_config_commands(subcommand);
+            alias::handle_alias_commands(subcommand);
+        },
+        Commands::Admin { subcommand } => {
+            admin::handle_admin_commands(subcommand);
         }
-        Some(("remove", sub_matches)) => {
-            let file = sub_matches.get_one::<String>("FILE").unwrap();
-            println!("Removing file: {}", file);
-        }
-        _ => println!("No valid subcommand provided."),
     }
 }
 
+
+
+// fn register_app2() {
+//     let mut app = Command::new(APPNAME)
+//         .version("1.0")
+//         .author("Your Name <you@example.com>")
+//         .about(ABOUT)
+        
+//         // alias 子命令及其子命令
+//         .subcommand(
+//             Command::new("alias")
+//                 .about("Manage server credentials")
+//                 .subcommand(
+//                     Command::new("set")
+//                         .about("Set a new alias to configuration file"),
+//                 )
+//                 .subcommand(
+//                     Command::new("list")
+//                         .about("List aliases in configuration file")
+//                         .arg(Arg::new("FILE").help("The file to list").required(true)),
+//                 )
+//                 .subcommand(
+//                     Command::new("remove")
+//                         .about("Remove an alias from configuration file")
+//                         .arg(Arg::new("FILE").help("The file to remove").required(true)),
+//                 )
+//                 .subcommand(
+//                     Command::new("import")
+//                         .about("Import configuration info to configuration file from a JSON formatted string")
+//                         .arg(Arg::new("FILE").help("The file to import").required(true)),
+//                 )
+//                 .subcommand(
+//                     Command::new("export")
+//                         .about("Export configuration info to stdout")
+//                         .arg(Arg::new("FILE").help("The file to export").required(true)),
+//                 ),
+//         )
+        
+//         // admin 子命令及其子命令
+//         .subcommand(
+//             Command::new("admin")
+//                 .about("Manage the system")
+//                 .subcommand(
+//                     Command::new("status")
+//                         .about("Show system status"),
+//                 )
+//                 .subcommand(
+//                     Command::new("restart")
+//                         .about("Restart the system"),
+//                 )
+//                 .subcommand(
+//                     Command::new("stop")
+//                         .about("Stop the system"),
+//                 ),
+//         );
+
+//     let matches = app.clone().get_matches(); // 先获取匹配结果
+//     //let mut app2 = app.clone();
+
+//     match matches.subcommand() {
+//         Some(("alias", sub_matches)) => {
+//             // 处理 alias 的子命令
+//             match sub_matches.subcommand() {
+//                 Some(("list", _sub_sub_matches)) => {
+//                     // let file = sub_sub_matches.get_one::<String>("FILE").unwrap();
+//                     // println!("Listing alias for file: {}", file);
+                    
+//                     cmd::cmd::alias_list();
+//                 }
+//                 Some(("remove", sub_sub_matches)) => {
+//                     let file = sub_sub_matches.get_one::<String>("FILE").unwrap();
+//                     println!("Removing alias for file: {}", file);
+//                 }
+//                 Some(("set", _)) => {
+//                     println!("Setting a new alias...");
+//                 }
+//                 _ => {
+//                     // 没有匹配到有效的 alias 子命令时，显示帮助信息
+//                     app.find_subcommand_mut("alias").unwrap().print_help().unwrap();
+//                     println!();
+//                     return; // 打印帮助后退出
+//                 }
+//             }
+//         }
+//         Some(("admin", sub_matches)) => {
+//             // 处理 admin 的子命令
+//             match sub_matches.subcommand() {
+//                 Some(("status", _)) => {
+//                     println!("Showing system status...");
+//                 }
+//                 Some(("restart", _)) => {
+//                     println!("Restarting the system...");
+//                 }
+//                 Some(("stop", _)) => {
+//                     println!("Stopping the system...");
+//                 }
+//                 _ => {
+//                     // 没有匹配到有效的 admin 子命令时，显示帮助信息
+//                     app.find_subcommand_mut("admin").unwrap().print_help().unwrap();
+//                     println!();
+//                     return;
+//                 }
+//             }
+//         }
+//         _ => {
+//             // 当没有提供任何子命令时，打印主命令帮助信息
+//             app.print_help().unwrap();
+//             println!();
+//         }
+//     }
+// }
 // func registerApp(name string) *cli.App {
 // 	cli.HelpFlag = cli.BoolFlag{
 // 		Name:  "help, h",
@@ -94,15 +221,8 @@ fn registerApp(name:String) {
 
 
 
-pub fn Main(args:Vec<String>) {
-      println!("hellow rfs");
-      if args.len() > 1 {
-	println!("hello word");
-      } else {
-	println!("--------");
-      }
-
-      registerApp("rustfs-cli".to_string());
+pub fn main(_args:Vec<String>) {
+  register_app();
 }
 
 
