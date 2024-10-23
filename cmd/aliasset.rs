@@ -71,8 +71,17 @@ pub fn main_set_alias(alias: &str, url:&str, ak:&str, sk:&str) -> io::Result<ali
         api_key: None,                  // 可选字段，没有值时使用 None
         src: Some(String::from("source-info")),     // 可选字段，提供值时使用 Some
     };
-    tofu::check_bucket_permissions(url, ak, sk, "us-east-1");
-    set_alias(alias, alias_config)
+    match tofu::check_bucket_permissions(url, ak, sk, "us-east-1") {
+        Ok(true) => {
+             set_alias(alias, alias_config)
+        }
+        Ok(false) => {
+            todo!();
+        } 
+        Err(_) => {
+            todo!()
+        }
+    }
 }
 
 fn set_alias(alias: &str, alias_cfg_v10: configx::AliasConfigV10) -> io::Result<alias::AliasMessage> {

@@ -31,6 +31,8 @@ fn generate_random_bucket_name() -> String {
         .take(10)
         .map(char::from)
         .collect();
+    let random_string = random_string.to_lowercase();  // 赋值给 random_string
+
     format!("probe-bucket-{}", random_string)
 }
 
@@ -54,39 +56,15 @@ pub fn check_bucket_permissions(
         .credentials_provider(credentials)
         .build();
     dbg!(config.clone());
-    //let s3_client = Client::from_conf(config);
-
-    let static_provider = StaticProvider::new(
-        access_key,
-        secret_key,
-        None,
-    );
-
-    let base_url = url.parse::<BaseUrl>()?;
-    let s3_client = ClientBuilder::new(base_url.clone())
-        .provider(Some(Box::new(static_provider)))
-        .build()?;
-
+    let s3_client = Client::from_conf(config);
 
     // 生成一个随机的 bucket 名字
     let random_bucket_name = generate_random_bucket_name();
-    let bucket_exists_options =  BucketExistsArgs{
-        region:None,
-        bucket: &random_bucket_name,
-        extra_headers: None,
-        extra_query_params: None,
-    };
-    println!("Generated random bucket name: {}", random_bucket_name);
-
-    // 检查 bucket 权限
-    // let rt = tokio::runtime::Builder::new_multi_thread()
-    //     .enable_all() // 启用所有 Tokio 的功能，如定时器、IO 等
-    //     .build()?; // 使用 `build` 方法来创建运行时
     let rt = tokio::runtime::Builder::new_current_thread()
         .enable_all() // 启用所有 Tokio 的功能
         .build()?; // 构建运行时
 
-    let head_bucket_result = rt.block_on(s3_client.bucket_exists(&bucket_exists_options));
+    let head_bucket_result = rt.block_on(s3_client.get_bucket_location().bucket(&random_bucket_name).send());
     match head_bucket_result {
         Ok(_) => {
             println!("Bucket '{}' exists and is accessible.", random_bucket_name);
@@ -94,15 +72,18 @@ pub fn check_bucket_permissions(
         }
         Err(err) => {
             let err_msg = format!("{:?}", err);
-            println!("err: {}\n", err_msg);
-            if err_msg.contains("InvalidBucketName") {
+            //println!("err: {}\n", err_msg);
+            if err_msg.contains("NoSuchBucket") {
                 println!("Bucket '{}' does not exist, access key and secret key are valid.", random_bucket_name);
                 Ok(true)
-            } else if err_msg.contains("AccessDenied") {
-                println!("Access denied to bucket '{}'.", random_bucket_name);
+            } else if err_msg.contains("SignatureDoesNotMatch") {
+                println!("SignatureDoesNotMatch '{}'.", random_bucket_name);
+                Ok(false)
+            } else if err_msg.contains("InvalidAccessKeyId") {
+                println!("InvalidAccessKeyId '{}': {:?}", random_bucket_name, err);
                 Ok(false)
             } else {
-                println!("Error accessing bucket '{}': {:?}", random_bucket_name, err);
+                println!("other err {}", err);
                 Ok(false)
             }
         }
