@@ -1,9 +1,9 @@
 use std::collections::HashMap;
-use std::fs;
-use std::io::{self, ErrorKind};
+// use std::fs;
+use std::io::{self};
 
-use crate::cmd::config;
 use crate::cmd::alias;
+use crate::cmd::config;
 
 use super::{configx, tofu};
 
@@ -59,32 +59,38 @@ impl McConfigV10 {
 //     fs::write(must_get_mc_config_path(), format!("{:?}", mc_cfg_v10))
 // }
 
-pub fn main_set_alias(alias: &str, url:&str, ak:&str, sk:&str) -> io::Result<alias::AliasMessage> {
+pub fn main_set_alias(
+    alias: &str,
+    url: &str,
+    ak: &str,
+    sk: &str,
+) -> io::Result<alias::AliasMessage> {
     let alias_config = configx::AliasConfigV10 {
         url: String::from(url),
         accessKey: String::from(ak),
         secretKey: String::from(sk),
-        session_token: None,            // 可选字段，可以使用 None
-        api: String::from("S3v4"),        // 假设 API 版本是 v4
+        session_token: None,       // 可选字段，可以使用 None
+        api: String::from("S3v4"), // 假设 API 版本是 v4
         path: String::from(""),
         license: Some(String::from("license-key")), // 可选字段，提供值时使用 Some
-        api_key: None,                  // 可选字段，没有值时使用 None
+        api_key: None,                              // 可选字段，没有值时使用 None
         src: Some(String::from("source-info")),     // 可选字段，提供值时使用 Some
     };
     match tofu::check_bucket_permissions(url, ak, sk, "us-east-1") {
-        Ok(true) => {
-             set_alias(alias, alias_config)
-        }
+        Ok(true) => set_alias(alias, alias_config),
         Ok(false) => {
             todo!();
-        } 
+        }
         Err(_) => {
             todo!()
         }
     }
 }
 
-fn set_alias(alias: &str, alias_cfg_v10: configx::AliasConfigV10) -> io::Result<alias::AliasMessage> {
+fn set_alias(
+    alias: &str,
+    alias_cfg_v10: configx::AliasConfigV10,
+) -> io::Result<alias::AliasMessage> {
     // 加载配置
     let mut mc_cfg_v10 = configx::load_config_v10().map_err(|err| {
         eprintln!(
@@ -93,8 +99,10 @@ fn set_alias(alias: &str, alias_cfg_v10: configx::AliasConfigV10) -> io::Result<
         );
         err
     })?;
-    
-    mc_cfg_v10.aliases.insert(alias.to_string(), alias_cfg_v10.clone());
+
+    mc_cfg_v10
+        .aliases
+        .insert(alias.to_string(), alias_cfg_v10.clone());
 
     // 保存配置
     configx::save_config_v10(&mc_cfg_v10).map_err(|err| {

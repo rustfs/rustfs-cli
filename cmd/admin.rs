@@ -1,4 +1,4 @@
-use clap::{Subcommand};
+use clap::Subcommand;
 
 #[derive(Subcommand)]
 pub enum AdminCommands {
@@ -7,7 +7,7 @@ pub enum AdminCommands {
         verbose: bool,
     },
     Set,
-//     Get
+    //     Get
 }
 
 // 处理 run 命令的逻辑

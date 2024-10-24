@@ -1,12 +1,12 @@
 //pub mod cmd::alias_list;
-use crate::cmd::{self, configx};
-use clap::{command, Arg, Command};
+// use crate::cmd::{self, configx};
+use clap::command;
 
 use super::{admin, alias};
 
 static APPNAME: &str = "rustfs-cli [FLAGS] COMMAND [COMMAND FLAGS | -h] [ARGUMENTS...]";
 static ABOUT: &str = "manager client for rustfs and minio";
-use clap::{Parser};
+use clap::Parser;
 
 #[derive(Parser)]
 #[command(name = "rustfs-cli")]
@@ -22,15 +22,14 @@ enum Commands {
     #[command(about = "manage server credentials in configuration file")]
     Alias {
         #[command(subcommand)]
-        subcommand: alias::AliasCommands,  // 从 config 模块导入
+        subcommand: alias::AliasCommands, // 从 config 模块导入
     },
     #[command(about = "manage MinIO servers")]
     Admin {
         #[command(subcommand)]
-        subcommand: admin::AdminCommands,  // 从 run 模块导入
+        subcommand: admin::AdminCommands, // 从 run 模块导入
     },
 }
-
 
 fn register_app() {
     let cli = Cli::parse();
@@ -39,21 +38,19 @@ fn register_app() {
         Commands::Alias { subcommand } => {
             //handle_config_commands(subcommand);
             alias::handle_alias_commands(subcommand);
-        },
+        }
         Commands::Admin { subcommand } => {
             admin::handle_admin_commands(subcommand);
         }
     }
 }
 
-
-
 // fn register_app2() {
 //     let mut app = Command::new(APPNAME)
 //         .version("1.0")
 //         .author("Your Name <you@example.com>")
 //         .about(ABOUT)
-        
+
 //         // alias 子命令及其子命令
 //         .subcommand(
 //             Command::new("alias")
@@ -83,7 +80,7 @@ fn register_app() {
 //                         .arg(Arg::new("FILE").help("The file to export").required(true)),
 //                 ),
 //         )
-        
+
 //         // admin 子命令及其子命令
 //         .subcommand(
 //             Command::new("admin")
@@ -112,7 +109,7 @@ fn register_app() {
 //                 Some(("list", _sub_sub_matches)) => {
 //                     // let file = sub_sub_matches.get_one::<String>("FILE").unwrap();
 //                     // println!("Listing alias for file: {}", file);
-                    
+
 //                     cmd::cmd::alias_list();
 //                 }
 //                 Some(("remove", sub_sub_matches)) => {
@@ -219,13 +216,9 @@ fn register_app() {
 // 	return app
 // }
 
-
-
-pub fn main(_args:Vec<String>) {
-  register_app();
+pub fn main(_args: Vec<String>) {
+    register_app();
 }
-
-
 
 // Copyright (c) 2015-2022 MinIO, Inc.
 //

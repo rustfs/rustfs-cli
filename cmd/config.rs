@@ -1,25 +1,23 @@
 use std::collections::HashMap;
-use std::env;
+// use std::env;
+use regex::Regex;
 use std::fs;
 use std::io::{self, BufRead};
-use std::path::{Path, PathBuf};
+use std::path::Path;
 use std::sync::Mutex;
-use regex::Regex;
-use serde_json::to_string;
-use url::Url;
+// use serde_json::to_string;
+// use url::Url;
 use lazy_static::lazy_static;
 
 use crate::cmd::aliaslist;
 use crate::cmd::configx::load_config_v10;
 
-
-
 // 全局变量存储配置目录和别名配置映射
 static mut MC_CUSTOM_CONFIG_DIR: Option<String> = None;
 lazy_static! {
-	static ref ALIAS_TO_CONFIG_MAP: Mutex<HashMap<String, AliasConfigV10>> = Mutex::new(HashMap::new());
+    static ref ALIAS_TO_CONFIG_MAP: Mutex<HashMap<String, AliasConfigV10>> =
+        Mutex::new(HashMap::new());
 }
-    
 
 // 配置结构体
 #[derive(Debug, Clone)]
@@ -45,7 +43,7 @@ pub fn get_mc_config_dir() -> Result<String, io::Error> {
         if let Some(ref dir) = MC_CUSTOM_CONFIG_DIR {
             return Ok(dir.clone());
         }
-    }  
+    }
 
     let home_dir = dirs::home_dir().ok_or(io::Error::new(
         io::ErrorKind::NotFound,
@@ -59,7 +57,11 @@ pub fn get_mc_config_dir() -> Result<String, io::Error> {
 pub fn default_mc_config_dir() -> String {
     if cfg!(windows) {
         let cmd = std::env::args().next().unwrap_or_default();
-        let cmd_base = Path::new(&cmd).file_stem().unwrap_or_default().to_str().unwrap();
+        let cmd_base = Path::new(&cmd)
+            .file_stem()
+            .unwrap_or_default()
+            .to_str()
+            .unwrap();
         return format!("{}\\", cmd_base);
     }
     //format!(".rustfs-cli/".to_string);
@@ -105,7 +107,7 @@ fn must_get_mc_config_path() -> String {
 pub fn save_mc_config(config: &AliasConfigV10) -> Result<(), io::Error> {
     create_mc_config_dir()?;
     let config_path = must_get_mc_config_path();
-    fs::write(config_path, format!("{:?}", config))?;  // 示例，将配置内容序列化保存
+    fs::write(config_path, format!("{:?}", config))?; // 示例，将配置内容序列化保存
     Ok(())
 }
 
@@ -125,7 +127,9 @@ fn clean_alias(alias: &str) -> String {
 
 // 验证别名是否合法
 fn is_valid_alias(alias: &str) -> bool {
-    Regex::new(r"^[a-zA-Z][a-zA-Z0-9-_]*$").unwrap().is_match(alias)
+    Regex::new(r"^[a-zA-Z][a-zA-Z0-9-_]*$")
+        .unwrap()
+        .is_match(alias)
 }
 
 // 从环境变量中获取别名配置
@@ -162,7 +166,6 @@ fn parse_env_url_str(env_url: &str) -> Option<(String, String, String, String)> 
     }
 }
 
-
 // 从文件读取别名
 fn read_aliases_from_file(env_config_file: &str) -> Result<(), io::Error> {
     let file = fs::File::open(env_config_file)?;
@@ -182,8 +185,8 @@ fn read_aliases_from_file(env_config_file: &str) -> Result<(), io::Error> {
         }
         if let Some(alias_config) = expand_alias_from_env(strs[1]) {
             //unsafe {
-	    let mut alias_map = ALIAS_TO_CONFIG_MAP.lock().unwrap();
-	    alias_map.insert(alias, alias_config);
+            let mut alias_map = ALIAS_TO_CONFIG_MAP.lock().unwrap();
+            alias_map.insert(alias, alias_config);
         }
     }
     Ok(())
@@ -193,51 +196,46 @@ fn global_mc_config_file() -> &'static str {
     "config.json"
 }
 
+pub fn alias_list(_name: &str) {
+    //set_mc_config_dir("/home/ldy".to_string());
+    // 示例：读取配置并打印
+    if is_mc_config_exists() {
+        //println!("Config exists at: {}", must_get_mc_config_path());
 
-pub fn alias_list(_name:&str) {
-	//set_mc_config_dir("/home/ldy".to_string());
-	// 示例：读取配置并打印
-	if is_mc_config_exists() {
-	    //println!("Config exists at: {}", must_get_mc_config_path());
-    
-    
-	    match load_config_v10() {
-		Ok(config) => {
-		    // 成功获取配置，处理 config
-            //aliaslist::build_alias_message(_name, config);
-            if _name.is_empty() {
-                aliaslist::list_aliases(&config.aliases, None);
-            } else {
-                aliaslist::list_aliases(&config.aliases, Some(_name));
+        match load_config_v10() {
+            Ok(config) => {
+                // 成功获取配置，处理 config
+                //aliaslist::build_alias_message(_name, config);
+                if _name.is_empty() {
+                    aliaslist::list_aliases(&config.aliases, None);
+                } else {
+                    aliaslist::list_aliases(&config.aliases, Some(_name));
+                }
+
+                //println!("配置加载成功: {:?}", config);
             }
-            
+            Err(e) => {
+                // 发生错误，处理错误
+                println!("配置加载失败: {:?} {}", e, must_get_mc_config_path());
+            }
+        }
 
-		    //println!("配置加载成功: {:?}", config);
-		}
-		Err(e) => {
-		    // 发生错误，处理错误
-		    println!("配置加载失败: {:?} {}", e, must_get_mc_config_path());
-		}
-	    }
-	    
-	    // if let Err(e) = read_aliases_from_file("/home/ldy/config.json") {
-	    //     eprintln!("Failed to read aliases from file: {}", e);
-	    // } else {
-    
-	    // }
-    
-	} else {
-		println!("not exist: {}",must_get_mc_config_path());
-	    //println!("Config does not exist.");
-	}
+        // if let Err(e) = read_aliases_from_file("/home/ldy/config.json") {
+        //     eprintln!("Failed to read aliases from file: {}", e);
+        // } else {
+
+        // }
+    } else {
+        println!("not exist: {}", must_get_mc_config_path());
+        //println!("Config does not exist.");
     }
+}
 
 // pub fn main() {
 //     set_mc_config_dir("/home/ldy".to_string());
 //     // 示例：读取配置并打印
 //     if is_mc_config_exists() {
 //         println!("Config exists at: {}", must_get_mc_config_path());
-
 
 //         match load_config_v10() {
 //             Ok(config) => {
@@ -249,7 +247,7 @@ pub fn alias_list(_name:&str) {
 //                 println!("配置加载失败: {:?}", e);
 //             }
 //         }
-        
+
 //         // if let Err(e) = read_aliases_from_file("/home/ldy/config.json") {
 //         //     eprintln!("Failed to read aliases from file: {}", e);
 //         // } else {

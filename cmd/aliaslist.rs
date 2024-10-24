@@ -1,4 +1,4 @@
-use clap::{Arg, Command};
+// use clap::{Arg, Command};
 use std::collections::HashMap;
 use std::fmt;
 
@@ -36,9 +36,7 @@ impl fmt::Display for AliasMessage {
     }
 }
 
-
-
-pub fn alias_list(name:&str) {
+pub fn alias_list(name: &str) {
     config::alias_list(name);
 }
 
@@ -73,7 +71,6 @@ pub fn build_alias_message(alias: &str, config: &AliasConfigV10) -> AliasMessage
         path: config.path.clone(),
     }
 }
-
 
 // pub fn main() {
 //     // 定义命令行工具
