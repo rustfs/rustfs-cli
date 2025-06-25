@@ -12,7 +12,7 @@ https://docs.aws.amazon.com/AmazonS3/latest/API/API_PutBucketReplication.html
 
 method: PUT
 
-URL and PAR: http://127.0.0.1/rustfs/admin/v3/set-remote-target?bucket=$bucket
+URL and PAR: http://127.0.0.1:7000/rustfs/admin/v3/set-remote-target?bucket=$bucket
 
 PUT body:
 json: 
@@ -22,6 +22,6 @@ json:
 
 method: GET
 
-URL and PAR:  http://127.0.0.1/rustfs/admin/v3/list-remote-targets?bucket=$bucket
+URL and PAR:  http://127.0.0.1:7000/rustfs/admin/v3/list-remote-targets?bucket=$bucket
 
 response data：
