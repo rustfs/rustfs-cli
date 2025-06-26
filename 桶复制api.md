@@ -65,9 +65,11 @@ Headers:
   access-control-expose-headers: *
   content-length: 81
   date: Thu, 26 Jun 2025 16:51:22 GMT
+  
 Body:
 
 "arn:minio:replication:us-east-1:8dec15ee-2bb9-4b68-a1a6-59decfbf33ec:destbucket"
+
 
 
 ### ListRemoteTargets-非 s3 标准协议
