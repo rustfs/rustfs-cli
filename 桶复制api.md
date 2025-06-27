@@ -1,22 +1,4 @@
 rustfs 桶复制用到的接口：
-### deletebucketreplication-标准接口， 参考 aws api 文档即可；
-https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteBucketReplication.html
-
-
-
-### bucket location-标准接口， 参考 aws api 文档即可
-
-https://docs.aws.amazon.com/AmazonS3/latest/API/API_GetBucketLocation.html
-
-
-### getbucketreplicaiton-标准接口，参考 aws api 文档即可
-
-https://docs.aws.amazon.com/AmazonS3/latest/API/API_GetBucketReplication.html 
-
-
-### putbucketreplication-标准接口，参考 aws api 文档即可
-
-https://docs.aws.amazon.com/AmazonS3/latest/API/API_PutBucketReplication.html
 
 
 ### SetRemoteTarget- 非s3 标准协议
@@ -69,6 +51,34 @@ Headers:
 Body:
 
 "arn:minio:replication:us-east-1:8dec15ee-2bb9-4b68-a1a6-59decfbf33ec:destbucket"
+### deletebucketreplication-标准接口， 参考 aws api 文档即可；
+https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteBucketReplication.html
+
+
+
+### bucket location-标准接口， 参考 aws api 文档即可
+
+https://docs.aws.amazon.com/AmazonS3/latest/API/API_GetBucketLocation.html
+
+
+
+### putbucketreplication-标准接口，参考 aws api 文档即可
+
+https://docs.aws.amazon.com/AmazonS3/latest/API/API_PutBucketReplication.html
+
+
+
+
+### getbucketreplicaiton-标准接口，参考 aws api 文档即可
+
+https://docs.aws.amazon.com/AmazonS3/latest/API/API_GetBucketReplication.html 
+
+
+
+
+
+
+
 
 
 
